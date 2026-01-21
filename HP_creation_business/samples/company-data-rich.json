@@ -1,0 +1,68 @@
+{
+  "companyName": "株式会社Appricot",
+  "companyNameEn": "Appricot Co.Ltd",
+  "representative": "成木崇・関口大耀・川野豪大",
+  "address": "東京都大田区田園調布5-29-25",
+  "established": "2024年03月",
+  "capital": "20万円",
+  "business": "アプリケーション開発",
+  "email": "info@appricot.jp",
+  "phone": "",
+
+  "sections": {
+    "hero": true,
+    "vision": true,
+    "services": true,
+    "strengths": true,
+    "companyInfo": true,
+    "contact": true
+  },
+
+  "vision": {
+    "title": "ビジョン",
+    "text": "日常の不便を解決し、より良い生活を創造する"
+  },
+
+  "mission": {
+    "title": "ミッション",
+    "text": "ユーザーのニーズに寄り添ったアプリケーション開発を通して、日々の生活に存在する様々な不便を解決し、価値を提供していきます。"
+  },
+
+  "services": [
+    {
+      "title": "アプリケーション開発",
+      "description": "ユーザーの日常に寄り添った、使いやすく価値のあるアプリケーションを開発いたします。最新の技術を活用し、直感的で分かりやすいUI/UXを実現します。",
+      "icon": "💻"
+    },
+    {
+      "title": "UI/UXデザイン",
+      "description": "ユーザー視点に立った使いやすいインターフェースと、心地よい体験を提供するデザインを設計します。",
+      "icon": "🎨"
+    },
+    {
+      "title": "継続的な改善サポート",
+      "description": "リリース後も継続的にユーザーの声を反映し、アプリケーションの改善・機能追加をサポートします。",
+      "icon": "🔄"
+    }
+  ],
+
+  "strengths": [
+    {
+      "title": "ユーザー視点のUI/UX設計",
+      "description": "常にユーザーの立場に立ち、使いやすさと分かりやすさを追求した設計を行います。",
+      "icon": "👥"
+    },
+    {
+      "title": "迅速な開発サイクル",
+      "description": "アジャイル開発手法を採用し、スピーディーかつ柔軟に対応します。",
+      "icon": "⚡"
+    },
+    {
+      "title": "徹底したサポート体制",
+      "description": "開発からリリース、運用まで一貫してサポート。お客様に寄り添った対応を心がけています。",
+      "icon": "🤝"
+    }
+  ],
+
+  "theme": "a"
+}

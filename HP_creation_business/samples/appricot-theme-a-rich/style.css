@@ -1,0 +1,425 @@
+/* ===================================
+   Theme A: Minimal & Clean (Rich Version)
+   =================================== */
+
+/* Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --color-primary: #FF6B35;
+    --color-text: #1a1a1a;
+    --color-text-light: #666666;
+    --color-bg: #FFFFFF;
+    --color-bg-light: #FAFAFA;
+    --color-border: #E5E7EB;
+}
+
+body {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 300;
+    color: var(--color-text);
+    background-color: var(--color-bg);
+    line-height: 1.8;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* Header */
+.header {
+    padding: 32px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+    border-radius: 50%;
+    position: relative;
+}
+
+.logo-icon::after {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 15px;
+    height: 15px;
+    background: #2D3748;
+    border-radius: 50%;
+}
+
+.logo-text {
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--color-text);
+    letter-spacing: 0.05em;
+}
+
+/* Hero Section */
+.hero {
+    padding: 120px 0;
+    text-align: center;
+    background-color: var(--color-bg);
+}
+
+.hero-title {
+    font-size: 48px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    letter-spacing: 0.05em;
+}
+
+.hero-subtitle {
+    font-size: 20px;
+    color: var(--color-text-light);
+    font-weight: 300;
+    line-height: 1.6;
+}
+
+/* Vision & Mission Section */
+.vision-mission {
+    padding: 100px 0;
+    background: linear-gradient(135deg, #FFF5F0 0%, #FFF8F5 100%);
+}
+
+.vm-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 40px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.vm-card {
+    background-color: var(--color-bg);
+    padding: 56px 48px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.vm-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.vm-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-primary);
+    letter-spacing: 0.2em;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+}
+
+.vm-text {
+    font-size: 18px;
+    line-height: 2;
+    color: var(--color-text);
+    font-weight: 400;
+}
+
+/* Services Section */
+.services {
+    padding: 100px 0;
+    background-color: var(--color-bg);
+}
+
+.section-title {
+    font-size: 32px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 64px;
+    letter-spacing: 0.1em;
+    position: relative;
+    display: inline-block;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background-color: var(--color-primary);
+}
+
+.service-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 32px;
+}
+
+.service-card {
+    background-color: var(--color-bg-light);
+    padding: 48px 32px;
+    border-radius: 12px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.service-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 24px rgba(255, 107, 53, 0.15);
+}
+
+.service-icon {
+    font-size: 56px;
+    margin-bottom: 24px;
+}
+
+.service-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--color-text);
+}
+
+.service-description {
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--color-text-light);
+}
+
+/* Strengths Section */
+.strengths {
+    padding: 100px 0;
+    background-color: var(--color-bg-light);
+}
+
+.strength-list {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.strength-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 32px;
+    background-color: var(--color-bg);
+    padding: 40px;
+    border-radius: 12px;
+    border-left: 4px solid var(--color-primary);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.strength-item:hover {
+    transform: translateX(8px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.strength-icon {
+    font-size: 48px;
+    flex-shrink: 0;
+}
+
+.strength-content {
+    flex: 1;
+}
+
+.strength-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--color-text);
+}
+
+.strength-description {
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--color-text-light);
+}
+
+/* Company Info Section */
+.company-info {
+    padding: 100px 0;
+    background-color: var(--color-bg);
+}
+
+.company-info .section-title {
+    margin-bottom: 64px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 32px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.info-card {
+    background-color: var(--color-bg-light);
+    padding: 48px 40px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.info-item {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+dt {
+    font-size: 14px;
+    color: var(--color-text-light);
+    font-weight: 400;
+}
+
+dd {
+    font-size: 16px;
+    color: var(--color-text);
+    font-weight: 400;
+}
+
+.english {
+    font-size: 14px;
+    color: var(--color-text-light);
+    font-weight: 300;
+}
+
+/* Contact Section */
+.contact {
+    padding: 100px 0;
+    background-color: var(--color-bg-light);
+    text-align: center;
+}
+
+.contact .section-title {
+    margin-bottom: 64px;
+}
+
+.contact-info {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.contact-email {
+    font-size: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.contact-label {
+    font-size: 14px;
+    color: var(--color-text-light);
+    font-weight: 400;
+}
+
+.contact-email a {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 400;
+    transition: opacity 0.2s ease;
+}
+
+.contact-email a:hover {
+    opacity: 0.7;
+}
+
+/* Footer */
+.footer {
+    padding: 48px 0;
+    background-color: var(--color-text);
+    color: #FFFFFF;
+    text-align: center;
+}
+
+.footer p {
+    font-size: 14px;
+    font-weight: 300;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero {
+        padding: 80px 0;
+    }
+
+    .hero-title {
+        font-size: 32px;
+    }
+
+    .hero-subtitle {
+        font-size: 16px;
+    }
+
+    .section-title {
+        font-size: 24px;
+    }
+
+    .vision-mission,
+    .services,
+    .strengths,
+    .company-info,
+    .contact {
+        padding: 60px 0;
+    }
+
+    .vm-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .vm-card {
+        padding: 40px 32px;
+    }
+
+    .service-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .strength-item {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 32px 24px;
+    }
+
+    .strength-icon {
+        font-size: 40px;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .info-card {
+        padding: 32px 24px;
+    }
+
+    .info-item {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+}

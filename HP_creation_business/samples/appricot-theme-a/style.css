@@ -1,0 +1,276 @@
+/* ===================================
+   Theme A: Minimal & Clean
+   =================================== */
+
+/* Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --color-primary: #FF6B35;
+    --color-text: #1a1a1a;
+    --color-text-light: #666666;
+    --color-bg: #FFFFFF;
+    --color-bg-light: #FAFAFA;
+    --color-border: #E5E7EB;
+}
+
+body {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 300;
+    color: var(--color-text);
+    background-color: var(--color-bg);
+    line-height: 1.8;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* Header */
+.header {
+    padding: 32px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+    border-radius: 50%;
+    position: relative;
+}
+
+.logo-icon::after {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 15px;
+    height: 15px;
+    background: #2D3748;
+    border-radius: 50%;
+}
+
+.logo-text {
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--color-text);
+    letter-spacing: 0.05em;
+}
+
+/* Hero Section */
+.hero {
+    padding: 120px 0;
+    text-align: center;
+    background-color: var(--color-bg);
+}
+
+.hero-title {
+    font-size: 48px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    letter-spacing: 0.05em;
+}
+
+.hero-subtitle {
+    font-size: 20px;
+    color: var(--color-text-light);
+    font-weight: 300;
+    line-height: 1.6;
+}
+
+/* About Section */
+.about {
+    padding: 100px 0;
+    background-color: var(--color-bg-light);
+    text-align: center;
+}
+
+.section-title {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 48px;
+    letter-spacing: 0.1em;
+    position: relative;
+    display: inline-block;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background-color: var(--color-primary);
+}
+
+.about-description {
+    font-size: 16px;
+    line-height: 2;
+    color: var(--color-text);
+}
+
+/* Company Info Section */
+.company-info {
+    padding: 100px 0;
+    background-color: var(--color-bg);
+}
+
+.company-info .section-title {
+    text-align: center;
+    margin-bottom: 64px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 32px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.info-card {
+    background-color: var(--color-bg-light);
+    padding: 48px 40px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.info-item {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+dt {
+    font-size: 14px;
+    color: var(--color-text-light);
+    font-weight: 400;
+}
+
+dd {
+    font-size: 16px;
+    color: var(--color-text);
+    font-weight: 400;
+}
+
+.english {
+    font-size: 14px;
+    color: var(--color-text-light);
+    font-weight: 300;
+}
+
+/* Contact Section */
+.contact {
+    padding: 100px 0;
+    background-color: var(--color-bg-light);
+    text-align: center;
+}
+
+.contact .section-title {
+    margin-bottom: 64px;
+}
+
+.contact-info {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.contact-email {
+    font-size: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.contact-label {
+    font-size: 14px;
+    color: var(--color-text-light);
+    font-weight: 400;
+}
+
+.contact-email a {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 400;
+    transition: opacity 0.2s ease;
+}
+
+.contact-email a:hover {
+    opacity: 0.7;
+}
+
+/* Footer */
+.footer {
+    padding: 48px 0;
+    background-color: var(--color-text);
+    color: #FFFFFF;
+    text-align: center;
+}
+
+.footer p {
+    font-size: 14px;
+    font-weight: 300;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero {
+        padding: 80px 0;
+    }
+
+    .hero-title {
+        font-size: 32px;
+    }
+
+    .hero-subtitle {
+        font-size: 16px;
+    }
+
+    .section-title {
+        font-size: 24px;
+    }
+
+    .about,
+    .company-info,
+    .contact {
+        padding: 60px 0;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .info-card {
+        padding: 32px 24px;
+    }
+
+    .info-item {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .about-description br {
+        display: none;
+    }
+}
