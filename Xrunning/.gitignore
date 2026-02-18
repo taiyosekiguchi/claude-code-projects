@@ -1,0 +1,25 @@
+# Environment
+.env
+.venv/
+venv/
+
+# Data & Logs
+data/
+logs/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
