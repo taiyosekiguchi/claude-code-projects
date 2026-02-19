@@ -6,7 +6,7 @@ import time
 
 import tweepy
 
-from config.settings import X_POST_MAX_RETRIES, X_POST_RETRY_INTERVAL
+from config.settings import X_POST_MAX_RETRIES
 
 logger = logging.getLogger("xrunning.twitter")
 
@@ -38,14 +38,14 @@ class TwitterPublisher:
 
             # レートリミット対策の待機（X APIは短時間連続投稿に厳しい）
             if i < len(tweets) - 1:
-                time.sleep(5)
+                time.sleep(15)
 
         return tweet_ids
 
     def _post_single(
         self, text: str, reply_to: str | None, num: int, total: int
     ) -> str | None:
-        """単一ツイートを投稿する（リトライあり）"""
+        """単一ツイートを投稿する（リトライあり、403は長めに待ってリトライ）"""
         for attempt in range(1, X_POST_MAX_RETRIES + 1):
             try:
                 response = self.client.create_tweet(
@@ -58,11 +58,21 @@ class TwitterPublisher:
 
             except tweepy.TooManyRequests as e:
                 logger.error(f"レートリミット超過: {e}")
-                return None
+                if attempt < X_POST_MAX_RETRIES:
+                    logger.info("60秒待機してリトライ...")
+                    time.sleep(60)
+                else:
+                    return None
+
+            except tweepy.Forbidden as e:
+                logger.error(f"403 Forbidden (試行{attempt}/{X_POST_MAX_RETRIES}): {e}")
+                if attempt < X_POST_MAX_RETRIES:
+                    logger.info("30秒待機してリトライ...")
+                    time.sleep(30)
 
             except tweepy.TweepyException as e:
                 logger.error(f"投稿失敗 (試行{attempt}/{X_POST_MAX_RETRIES}): {e}")
                 if attempt < X_POST_MAX_RETRIES:
-                    time.sleep(X_POST_RETRY_INTERVAL)
+                    time.sleep(10)
 
         return None
