@@ -62,7 +62,7 @@ SOURCE_TRUST_SCORES = {
 
 # 処理設定
 MAX_ARTICLES_FOR_AI = 10  # Claude CLIに渡す最大記事数
-THREAD_MAX_TWEETS = 7  # スレッド最大ツイート数
+THREAD_MAX_TWEETS = 5  # スレッド最大ツイート数（X API制限対策で5に制限）
 TWEET_MAX_LENGTH = 270  # 280 - ハッシュタグ等のバッファ
 URL_LENGTH = 23  # X のt.co短縮URL長
 
