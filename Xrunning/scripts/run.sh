@@ -32,8 +32,18 @@ else
     exit 1
 fi
 
-# メインスクリプト実行
-PYTHONPATH="$PROJECT_DIR" python3 "$PROJECT_DIR/src/main.py" "$@"
+# 現在の時間で実行モードを判定
+CURRENT_HOUR=$(date +%H)
+
+if [ "$CURRENT_HOUR" -lt 10 ]; then
+    # 朝（8時台）: 初回実行（収集→フィルタ→AI要約→投稿）
+    echo "モード: 初回実行"
+    PYTHONPATH="$PROJECT_DIR" python3 "$PROJECT_DIR/src/main.py" "$@"
+else
+    # 昼・夜（12時/20時台）: リトライモード
+    echo "モード: リトライ"
+    PYTHONPATH="$PROJECT_DIR" python3 "$PROJECT_DIR/src/main.py" --retry "$@"
+fi
 
 EXIT_CODE=$?
 echo "=== Xrunning 終了: $(date), 終了コード: $EXIT_CODE ==="

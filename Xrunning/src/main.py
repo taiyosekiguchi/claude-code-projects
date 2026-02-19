@@ -9,7 +9,7 @@ from datetime import date, datetime, timedelta, timezone
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
-from config.settings import DATA_DIR, LOG_DIR, MAX_ARTICLES_FOR_AI
+from config.settings import DATA_DIR, LOG_DIR, MAX_ARTICLES_FOR_AI, THREAD_MAX_TWEETS
 from src.ai.summarizer import generate_thread, build_fallback_thread
 from src.collectors.rss_collector import RSSCollector
 from src.collectors.hackernews import HackerNewsCollector
@@ -22,6 +22,9 @@ from src.publisher.thread_builder import validate_thread
 
 JST = timezone(timedelta(hours=9))
 logger = logging.getLogger("xrunning")
+
+# 投稿状態ファイル（その日の投稿が完了したかを管理）
+STATUS_FILE = DATA_DIR / "cache" / "post_status.json"
 
 
 def setup_logging() -> None:
@@ -48,6 +51,60 @@ def setup_logging() -> None:
 
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
+
+
+def load_post_status() -> dict:
+    """投稿状態を読み込む"""
+    if not STATUS_FILE.exists():
+        return {}
+    try:
+        return json.loads(STATUS_FILE.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def save_post_status(status: dict) -> None:
+    """投稿状態を保存する"""
+    STATUS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    STATUS_FILE.write_text(
+        json.dumps(status, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+
+def is_post_complete_today() -> bool:
+    """今日の投稿が全ツイート成功済みかチェック"""
+    status = load_post_status()
+    today = date.today().isoformat()
+    return status.get("date") == today and status.get("complete", False)
+
+
+def mark_post_complete() -> None:
+    """今日の投稿を完了としてマーク"""
+    save_post_status({
+        "date": date.today().isoformat(),
+        "complete": True,
+    })
+
+
+def mark_post_failed(tweet_ids: list[str], tweets: list[str], retry_count: int) -> None:
+    """今日の投稿が未完了であることを記録（リトライ用データ保存）"""
+    save_post_status({
+        "date": date.today().isoformat(),
+        "complete": False,
+        "posted_ids": tweet_ids,
+        "all_tweets": tweets,
+        "last_retry": retry_count,
+    })
+
+
+def clear_failed_post() -> None:
+    """失敗した投稿データを消去する"""
+    save_post_status({
+        "date": date.today().isoformat(),
+        "complete": True,  # あきらめたのでcomplete扱い（再実行しない）
+        "gave_up": True,
+    })
 
 
 async def collect_all() -> list:
@@ -116,8 +173,13 @@ def cleanup_old_data() -> None:
 
 
 async def run(dry_run: bool = False) -> None:
-    """メインパイプライン実行"""
+    """メインパイプライン実行（朝8時の初回実行）"""
     logger.info("=== Xrunning パイプライン開始 ===")
+
+    # 既に今日の投稿が完了していればスキップ
+    if is_post_complete_today():
+        logger.info("今日の投稿は既に完了しています。スキップ")
+        return
 
     # 1. 収集
     logger.info("--- ステップ1: 情報収集 ---")
@@ -185,16 +247,108 @@ async def run(dry_run: bool = False) -> None:
     publisher = TwitterPublisher()
     tweet_ids = publisher.post_thread(tweets)
 
-    if tweet_ids:
+    if tweet_ids and len(tweet_ids) == len(tweets):
+        # 全ツイート成功
         save_post_result(tweet_ids, tweets, top_articles)
-        logger.info(f"投稿完了: {len(tweet_ids)}ツイート")
+        mark_post_complete()
+        logger.info(f"投稿完了: {len(tweet_ids)}/{len(tweets)}ツイート（全て成功）")
+    elif tweet_ids:
+        # 一部成功 → リトライ用に保存
+        save_post_result(tweet_ids, tweets, top_articles)
+        mark_post_failed(tweet_ids, tweets, retry_count=0)
+        logger.warning(f"投稿一部成功: {len(tweet_ids)}/{len(tweets)}ツイート。昼・夜にリトライ予定")
     else:
-        logger.error("投稿に失敗しました")
+        # 全て失敗 → リトライ用に保存
+        mark_post_failed([], tweets, retry_count=0)
+        logger.error("投稿に全て失敗しました。昼・夜にリトライ予定")
 
     # 6. クリーンアップ
     cleanup_old_data()
 
     logger.info("=== Xrunning パイプライン完了 ===")
+
+
+async def run_retry() -> None:
+    """リトライ実行（昼12時・夜20時）"""
+    logger.info("=== Xrunning リトライ実行 ===")
+
+    # 今日の投稿が完了済みならスキップ
+    if is_post_complete_today():
+        logger.info("今日の投稿は完了済み。リトライ不要")
+        return
+
+    # 未完了の投稿データを読み込む
+    status = load_post_status()
+    today = date.today().isoformat()
+
+    if status.get("date") != today:
+        logger.info("今日の投稿データがありません。リトライ不要")
+        return
+
+    posted_ids = status.get("posted_ids", [])
+    all_tweets = status.get("all_tweets", [])
+    last_retry = status.get("last_retry", 0)
+
+    if not all_tweets:
+        logger.info("リトライ対象のツイートがありません")
+        return
+
+    # 残りのツイートを特定
+    remaining_tweets = all_tweets[len(posted_ids):]
+    if not remaining_tweets:
+        logger.info("全ツイート投稿済み")
+        mark_post_complete()
+        return
+
+    retry_count = last_retry + 1
+    logger.info(f"リトライ {retry_count}回目: 残り{len(remaining_tweets)}ツイートを投稿")
+
+    # 最後の投稿済みツイートIDを取得（リプライチェーン用）
+    reply_to = posted_ids[-1] if posted_ids else None
+
+    publisher = TwitterPublisher()
+    import time
+    new_ids = []
+
+    for i, tweet_text in enumerate(remaining_tweets):
+        num = len(posted_ids) + i + 1
+        total = len(all_tweets)
+        tweet_id = publisher._post_single(tweet_text, reply_to, num, total)
+
+        if tweet_id is None:
+            logger.error(f"リトライ: ツイート{num}/{total}の投稿に失敗")
+            break
+
+        new_ids.append(tweet_id)
+        reply_to = tweet_id
+        logger.info(f"リトライ投稿成功 [{num}/{total}]: id={tweet_id}")
+
+        if i < len(remaining_tweets) - 1:
+            time.sleep(15)
+
+    # 結果を更新
+    all_posted_ids = posted_ids + new_ids
+
+    if len(all_posted_ids) == len(all_tweets):
+        # 全ツイート成功
+        mark_post_complete()
+        logger.info(f"リトライ成功: 全{len(all_tweets)}ツイート投稿完了")
+    elif retry_count >= 2:
+        # 2回リトライしてもダメ → あきらめて消去
+        clear_failed_post()
+        logger.warning(
+            f"リトライ{retry_count}回失敗。本日の投稿をあきらめます。"
+            f"（{len(all_posted_ids)}/{len(all_tweets)}ツイートのみ投稿済み）"
+        )
+    else:
+        # まだリトライ回数が残っている
+        mark_post_failed(all_posted_ids, all_tweets, retry_count)
+        logger.warning(
+            f"リトライ{retry_count}回目失敗: {len(all_posted_ids)}/{len(all_tweets)}ツイート。"
+            f"次のリトライで再試行予定"
+        )
+
+    logger.info("=== Xrunning リトライ完了 ===")
 
 
 def main():
@@ -204,12 +358,20 @@ def main():
         action="store_true",
         help="投稿せずにログ出力のみ行う",
     )
+    parser.add_argument(
+        "--retry",
+        action="store_true",
+        help="朝の投稿が未完了の場合にリトライする",
+    )
     args = parser.parse_args()
 
     setup_logging()
 
     try:
-        asyncio.run(run(dry_run=args.dry_run))
+        if args.retry:
+            asyncio.run(run_retry())
+        else:
+            asyncio.run(run(dry_run=args.dry_run))
     except Exception as e:
         logger.critical(f"予期しないエラー: {e}", exc_info=True)
         sys.exit(1)
