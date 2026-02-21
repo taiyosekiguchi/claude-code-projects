@@ -9,7 +9,13 @@ from datetime import date, datetime, timedelta, timezone
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
-from config.settings import DATA_DIR, LOG_DIR, MAX_ARTICLES_FOR_AI, THREAD_MAX_TWEETS
+from config.settings import (
+    ANALYTICS_DB_PATH,
+    DATA_DIR,
+    LOG_DIR,
+    MAX_ARTICLES_FOR_AI,
+    THREAD_MAX_TWEETS,
+)
 from src.ai.summarizer import generate_thread, build_fallback_thread
 from src.collectors.rss_collector import RSSCollector
 from src.collectors.hackernews import HackerNewsCollector
@@ -142,10 +148,16 @@ def save_json(data: list[dict], subdir: str, filename: str) -> Path:
     return filepath
 
 
-def save_post_result(tweet_ids: list[str], tweets: list[str], articles: list) -> None:
+def save_post_result(
+    tweet_ids: list[str],
+    tweets: list[str],
+    articles: list,
+    content_type: str = "news_thread",
+) -> None:
     """投稿結果を保存する"""
     result = {
         "date": date.today().isoformat(),
+        "content_type": content_type,
         "tweet_ids": tweet_ids,
         "tweets": tweets,
         "articles_used": [a.to_dict() for a in articles],
@@ -211,8 +223,11 @@ async def run(dry_run: bool = False) -> None:
         logger.warning("フィルタ後の記事が2件未満のため処理を中断します")
         return
 
-    # 3. スコアリング
-    scored = score_articles(filtered)
+    # 3. スコアリング（分析フィードバック付き）
+    topic_boosts = _get_topic_boosts()
+    if topic_boosts:
+        logger.info(f"トピックブースト適用: {len(topic_boosts)}トピック")
+    scored = score_articles(filtered, topic_boosts=topic_boosts)
     top_articles = scored[:MAX_ARTICLES_FOR_AI]
 
     save_json(
@@ -222,9 +237,12 @@ async def run(dry_run: bool = False) -> None:
     )
     logger.info(f"上位{len(top_articles)}件を選出")
 
-    # 4. AI要約
+    # 4. AI要約（コンテンツタイプ別 + 動的プロンプト最適化付き）
     logger.info("--- ステップ3: AI要約 ---")
-    tweets = generate_thread(top_articles)
+    content_type = _get_content_type()
+    logger.info(f"コンテンツタイプ: {content_type}")
+    custom_prompt = _get_optimized_prompt(top_articles, content_type=content_type)
+    tweets = generate_thread(top_articles, custom_prompt=custom_prompt, content_type=content_type)
 
     if not tweets:
         logger.warning("AI要約が全て失敗。フォールバック生成を実行")
@@ -249,12 +267,12 @@ async def run(dry_run: bool = False) -> None:
 
     if tweet_ids and len(tweet_ids) == len(tweets):
         # 全ツイート成功
-        save_post_result(tweet_ids, tweets, top_articles)
+        save_post_result(tweet_ids, tweets, top_articles, content_type=content_type)
         mark_post_complete()
         logger.info(f"投稿完了: {len(tweet_ids)}/{len(tweets)}ツイート（全て成功）")
     elif tweet_ids:
         # 一部成功 → リトライ用に保存
-        save_post_result(tweet_ids, tweets, top_articles)
+        save_post_result(tweet_ids, tweets, top_articles, content_type=content_type)
         mark_post_failed(tweet_ids, tweets, retry_count=0)
         logger.warning(f"投稿一部成功: {len(tweet_ids)}/{len(tweets)}ツイート。昼・夜にリトライ予定")
     else:
@@ -349,6 +367,59 @@ async def run_retry() -> None:
         )
 
     logger.info("=== Xrunning リトライ完了 ===")
+
+
+def _get_topic_boosts() -> dict[str, float]:
+    """分析DBからトピックブースト値を取得（失敗時は空辞書）"""
+    try:
+        from src.analytics.prompt_optimizer import PromptOptimizer
+        from src.analytics.engagement_db import EngagementDB
+
+        db = EngagementDB(ANALYTICS_DB_PATH)
+        optimizer = PromptOptimizer(db)
+        boosts = optimizer.get_topic_boosts()
+        if boosts:
+            logger.info(f"トピックブースト: {boosts}")
+        return boosts
+    except Exception as e:
+        logger.debug(f"トピックブースト取得スキップ: {e}")
+        return {}
+
+
+def _get_content_type() -> str:
+    """今日のコンテンツタイプを取得（失敗時はnews_thread）"""
+    try:
+        from src.analytics.growth_strategy import GrowthStrategyManager
+
+        manager = GrowthStrategyManager()
+        content_type = manager.get_todays_content_type()
+        info = manager.get_content_type_info(content_type)
+        logger.info(f"今日のコンテンツ: {info['name']} ({content_type})")
+        return content_type
+    except Exception as e:
+        logger.debug(f"コンテンツタイプ取得スキップ: {e}")
+        return "news_thread"
+
+
+def _get_optimized_prompt(articles: list, content_type: str = "news_thread") -> str | None:
+    """分析DBから最適化プロンプトを取得（失敗時はNone=デフォルト使用）"""
+    try:
+        from src.analytics.prompt_optimizer import PromptOptimizer
+        from src.analytics.engagement_db import EngagementDB
+
+        db = EngagementDB(ANALYTICS_DB_PATH)
+        optimizer = PromptOptimizer(db)
+
+        articles_json = json.dumps(
+            [a.to_dict() for a in articles],
+            ensure_ascii=False,
+            indent=2,
+        )
+        prompt = optimizer.build_optimized_prompt(articles_json, content_type=content_type)
+        return prompt
+    except Exception as e:
+        logger.debug(f"プロンプト最適化スキップ: {e}")
+        return None
 
 
 def main():

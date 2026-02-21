@@ -18,7 +18,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # データディレクトリの作成
-mkdir -p data/raw data/filtered data/posts data/cache logs
+mkdir -p data/raw data/filtered data/posts data/cache data/reports data/analytics_import logs
 
 # .envファイルの確認
 if [ ! -f ".env" ]; then
@@ -29,11 +29,19 @@ if [ ! -f ".env" ]; then
     echo "  nano .env"
 fi
 
+# Playwright ブラウザのインストール
+echo "Playwrightのブラウザ（Chromium）をインストール中..."
+playwright install chromium 2>/dev/null || echo "WARNING: Playwright Chromiumのインストールに失敗。手動で 'playwright install chromium' を実行してください。"
+
 # launchdの登録
 echo ""
 echo "launchdの登録 (任意):"
 echo "  ln -sf \"$PROJECT_DIR/launchd/com.taiyo.xrunning.plist\" ~/Library/LaunchAgents/"
 echo "  launchctl load ~/Library/LaunchAgents/com.taiyo.xrunning.plist"
+echo ""
+echo "  # 分析パイプライン（エンゲージメント収集）:"
+echo "  ln -sf \"$PROJECT_DIR/launchd/com.taiyo.xrunning.analytics.plist\" ~/Library/LaunchAgents/"
+echo "  launchctl load ~/Library/LaunchAgents/com.taiyo.xrunning.analytics.plist"
 
 # Claude CLIの確認
 if command -v claude &> /dev/null; then

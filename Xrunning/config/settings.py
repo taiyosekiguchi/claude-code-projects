@@ -1,11 +1,39 @@
 """全体設定: ソースURL、フィルタキーワード、定数"""
 
+import os
 from pathlib import Path
 
 # プロジェクトルート
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = PROJECT_DIR / "data"
 LOG_DIR = PROJECT_DIR / "logs"
+
+# === Analytics 設定 ===
+ANALYTICS_DB_PATH = DATA_DIR / "analytics.db"
+ANALYTICS_IMPORT_DIR = DATA_DIR / "analytics_import"
+REPORTS_DIR = DATA_DIR / "reports"
+
+# X ユーザー名（ツイートURL構築に使用）
+X_USERNAME = os.environ.get("X_USERNAME", "lumina_journal")
+
+# スクレイピング設定
+SCRAPE_DELAY_BETWEEN_TWEETS = 15  # ツイート間の待機秒数
+SCRAPE_PAGE_TIMEOUT = 30000  # ページ読み込みタイムアウト(ms)
+
+# A/B テスト設定
+AB_TEST_VARIANT_DURATION_DAYS = 7  # 各バリアントの実施日数
+
+# 成長目標
+TARGET_FOLLOWERS = 500
+TARGET_IMPRESSIONS_3MO = 5_000_000
+
+# トピックブースト設定（分析フィードバック）
+TOPIC_BOOST_LOOKBACK_DAYS = 30  # 何日分のデータを参照するか
+TOPIC_BOOST_MAX_MULTIPLIER = 1.5  # 最大ブースト倍率
+TOPIC_BOOST_MIN_MULTIPLIER = 0.7  # 最小ブースト倍率
+
+# フィードバックループ起動に必要な最小データ日数
+MIN_DATA_DAYS_FOR_FEEDBACK = 14
 
 # RSSフィード {ソース名: URL}
 RSS_FEEDS = {

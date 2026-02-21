@@ -6,24 +6,41 @@ import logging
 import subprocess
 from dataclasses import asdict
 
-from config.prompts import SUMMARIZE_PROMPT
+from config.prompts import SUMMARIZE_PROMPT, CONTENT_TYPE_PROMPTS
 from config.settings import CLAUDE_MAX_RETRIES, CLAUDE_RETRY_INTERVAL, CLAUDE_TIMEOUT
 from src.models.article import Article
 
 logger = logging.getLogger("xrunning.summarizer")
 
 
-def generate_thread(articles: list[Article]) -> list[str]:
+def generate_thread(
+    articles: list[Article],
+    custom_prompt: str | None = None,
+    content_type: str = "news_thread",
+) -> list[str]:
     """
     Claude Code CLIで記事をスレッド形式に要約する。
-    失敗時はリトライし、全て失敗した場合はNoneを返す。
+    失敗時はリトライし、全て失敗した場合は空リストを返す。
+
+    Args:
+        articles: 要約対象の記事リスト
+        custom_prompt: 動的最適化されたプロンプト（Noneの場合はデフォルト使用）
+        content_type: コンテンツタイプ（news_thread, weekly_roundup, tool_spotlight, tips_thread）
     """
     articles_json = json.dumps(
         [a.to_dict() for a in articles],
         ensure_ascii=False,
         indent=2,
     )
-    prompt = SUMMARIZE_PROMPT.format(articles_json=articles_json)
+
+    if custom_prompt:
+        prompt = custom_prompt
+        logger.info(f"最適化プロンプトを使用 (content_type={content_type})")
+    else:
+        # コンテンツタイプに応じたベースプロンプトを選択
+        base_prompt = CONTENT_TYPE_PROMPTS.get(content_type, SUMMARIZE_PROMPT)
+        prompt = base_prompt.format(articles_json=articles_json)
+        logger.info(f"ベースプロンプトを使用 (content_type={content_type})")
 
     for attempt in range(1, CLAUDE_MAX_RETRIES + 1):
         try:
