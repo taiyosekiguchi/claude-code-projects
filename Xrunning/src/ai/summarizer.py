@@ -37,8 +37,9 @@ def generate_thread(articles: list[Article]) -> list[str]:
             )
 
             if result.returncode != 0:
-                logger.error(f"Claude CLI終了コード {result.returncode}: {result.stderr[:200]}")
-                raise RuntimeError(f"Claude CLI error: {result.stderr[:200]}")
+                error_detail = result.stderr[:200] or result.stdout[:200]
+                logger.error(f"Claude CLI終了コード {result.returncode}: {error_detail}")
+                raise RuntimeError(f"Claude CLI error: {error_detail}")
 
             output = result.stdout.strip()
             if not output:
