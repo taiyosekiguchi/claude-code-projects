@@ -9,7 +9,7 @@
     <key>ProgramArguments</key>
     <array>
         <string>/bin/bash</string>
-        <string>/Users/taiyo/Documents/書類 - TaiyoのMac mini/gitfiles/claude-code-projects/Xrunning/scripts/run.sh</string>
+        <string>/Users/taiyo/Documents/Documents-macmini/gitfiles/claude-code-projects/Xrunning/scripts/run.sh</string>
     </array>
 
     <key>StartCalendarInterval</key>
@@ -38,10 +38,10 @@
     </array>
 
     <key>StandardOutPath</key>
-    <string>/Users/taiyo/Documents/書類 - TaiyoのMac mini/gitfiles/claude-code-projects/Xrunning/logs/launchd_stdout.log</string>
+    <string>/Users/taiyo/Documents/Documents-macmini/gitfiles/claude-code-projects/Xrunning/logs/launchd_stdout.log</string>
 
     <key>StandardErrorPath</key>
-    <string>/Users/taiyo/Documents/書類 - TaiyoのMac mini/gitfiles/claude-code-projects/Xrunning/logs/launchd_stderr.log</string>
+    <string>/Users/taiyo/Documents/Documents-macmini/gitfiles/claude-code-projects/Xrunning/logs/launchd_stderr.log</string>
 
     <key>EnvironmentVariables</key>
     <dict>
@@ -52,7 +52,7 @@
     </dict>
 
     <key>WorkingDirectory</key>
-    <string>/Users/taiyo/Documents/書類 - TaiyoのMac mini/gitfiles/claude-code-projects/Xrunning</string>
+    <string>/Users/taiyo/Documents/Documents-macmini/gitfiles/claude-code-projects/Xrunning</string>
 
     <key>RunAtLoad</key>
     <false/>

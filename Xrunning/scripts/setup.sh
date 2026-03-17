@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-PROJECT_DIR="/Users/taiyo/Documents/書類 - TaiyoのMac mini/gitfiles/claude-code-projects/Xrunning"
+PROJECT_DIR="/Users/taiyo/Documents/Documents-macmini/gitfiles/claude-code-projects/Xrunning"
 cd "$PROJECT_DIR"
 
 echo "=== Xrunning セットアップ ==="

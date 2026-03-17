@@ -1,7 +1,7 @@
 #!/bin/bash
 # Xrunning 診断スクリプト - 更新停止の原因を特定する
 
-PROJECT_DIR="/Users/taiyo/Documents/書類 - TaiyoのMac mini/gitfiles/claude-code-projects/Xrunning"
+PROJECT_DIR="/Users/taiyo/Documents/Documents-macmini/gitfiles/claude-code-projects/Xrunning"
 cd "$PROJECT_DIR"
 
 echo "======================================"

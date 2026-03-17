@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # プロジェクトディレクトリ
-PROJECT_DIR="/Users/taiyo/Documents/書類 - TaiyoのMac mini/gitfiles/claude-code-projects/Xrunning"
+PROJECT_DIR="/Users/taiyo/Documents-macmini/gitfiles/claude-code-projects/Xrunning"
 cd "$PROJECT_DIR"
 
 # ログディレクトリ確保
