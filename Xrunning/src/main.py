@@ -185,7 +185,15 @@ async def run(dry_run: bool = False) -> None:
     logger.info("--- ステップ1: 情報収集 ---")
     articles = await collect_all()
     if not articles:
-        logger.warning("記事が0件のため処理を中断します")
+        logger.warning("記事が0件のため処理を中断します（ネットワーク障害の可能性）。リトライ待ち状態に設定")
+        save_post_status({
+            "date": date.today().isoformat(),
+            "complete": False,
+            "collection_failed": True,
+            "posted_ids": [],
+            "all_tweets": [],
+            "last_retry": 0,
+        })
         return
 
     save_json(
@@ -283,6 +291,12 @@ async def run_retry() -> None:
 
     if status.get("date") != today:
         logger.info("今日の投稿データがありません。リトライ不要")
+        return
+
+    # 収集失敗（ネットワーク障害など）の場合はフルパイプラインを再実行
+    if status.get("collection_failed"):
+        logger.info("前回収集失敗のため、収集からやり直します")
+        await run()
         return
 
     posted_ids = status.get("posted_ids", [])

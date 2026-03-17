@@ -14,6 +14,20 @@ exec > >(tee -a "$LOG_FILE") 2>&1
 
 echo "=== Xrunning 開始: $(date) ==="
 
+# ネットワーク接続待ち（最大180秒）
+echo "ネットワーク接続確認中..."
+NETWORK_WAIT=0
+while ! curl -s --max-time 5 https://dns.google > /dev/null 2>&1; do
+    if [ "$NETWORK_WAIT" -ge 180 ]; then
+        echo "ERROR: ネットワーク接続タイムアウト（180秒待機）。終了します。"
+        exit 1
+    fi
+    echo "ネットワーク待機中... ${NETWORK_WAIT}秒経過"
+    sleep 10
+    NETWORK_WAIT=$((NETWORK_WAIT + 10))
+done
+echo "ネットワーク接続確認完了（${NETWORK_WAIT}秒待機）"
+
 # .envファイル読み込み
 if [ -f "$PROJECT_DIR/.env" ]; then
     set -a
